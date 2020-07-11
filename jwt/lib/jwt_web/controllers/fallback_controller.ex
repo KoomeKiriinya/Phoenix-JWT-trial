@@ -21,4 +21,11 @@ defmodule JwtWeb.FallbackController do
     |> put_view(JwtWeb.ErrorView)
     |> render(:"404")
   end
+
+  # added call back function
+  def call(conn, {:error, :unauthorized}) do
+    conn
+    |> put_status(:unauthorized)
+    |> json(%{error: "Login error"})
+  end
 end

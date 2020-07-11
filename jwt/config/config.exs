@@ -10,6 +10,11 @@ use Mix.Config
 config :jwt,
   ecto_repos: [Jwt.Repo]
 
+# line added for guardian
+config :jwt, Jwt.Guardian,
+  issuer: "jwt",
+  secret_key: "HPfdCk8EHaytb6Iz8sVmOsq0k/AAXhJttIdrHwrwZedUtOqaN0vYXyYfO7eIu4Cx"
+
 # Configures the endpoint
 config :jwt, JwtWeb.Endpoint,
   url: [host: "localhost"],

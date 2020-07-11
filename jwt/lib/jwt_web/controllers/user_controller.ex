@@ -3,6 +3,7 @@ defmodule JwtWeb.UserController do
 
   alias Jwt.Accounts
   alias Jwt.Accounts.User
+  alias Jwt.Guardian
 
   action_fallback JwtWeb.FallbackController
 
@@ -12,11 +13,12 @@ defmodule JwtWeb.UserController do
   end
 
   def create(conn, %{"user" => user_params}) do
-    with {:ok, %User{} = user} <- Accounts.create_user(user_params) do
-      conn
-      |> put_status(:created)
-      |> put_resp_header("location", Routes.user_path(conn, :show, user))
-      |> render("show.json", user: user)
+    with {:ok, %User{} = user} <- Accounts.create_user(user_params),
+         {:ok, token, _claims} <- Guardian.encode_and_sign(user) do
+      conn |> render("jwt.json", jwt: token)
+      # |> put_status(:created)
+      # |> put_resp_header("location", Routes.user_path(conn, :show, user))
+      # |> render("show.json", user: user)
     end
   end
 
@@ -39,5 +41,13 @@ defmodule JwtWeb.UserController do
     with {:ok, %User{}} <- Accounts.delete_user(user) do
       send_resp(conn, :no_content, "")
     end
+  end
+  def sign_in(conn, %{"email" => email, "password" => password}) do
+    case Accounts.token_sign_in(email, password) do
+      {:ok, token, _claims} ->
+        conn |> render("jwt.json", jwt: token)
+        _ ->
+          {:error, :unauthorized}
+      end
   end
 end
